@@ -159,10 +159,19 @@ def books(request):
 		text = request.POST['text']
 		#  Try catch required
 		url = "https://www.googleapis.com/books/v1/volumes?q="+text;
-		r = requests.get(url)
-		ans = r.json()
+		try:
+			r = requests.get(url)
+			ans = r.json()
+		except: 
+			messages.error(request,f"Error please try again")
+			return redirect('books')
+		minLength = 0
+		try:
+			minLength = len(ans['items'])
+		except: 
+			minLength = 0
 		result_list = []
-		for i in range(10):
+		for i in range(min(10,minLength)):
 			result_dict = {
 			'title':ans['items'][i]['volumeInfo']['title'],
 			'subTitle':ans['items'][i]['volumeInfo'].get('subtitle'),
@@ -178,8 +187,8 @@ def books(request):
 		return render(request,'dashboard/books.html',context)
 	else:
 		form = DashboardForm()
-	search = DashboardForm()
-	context = {"search":search}
+	form = DashboardForm()
+	context = {"form":form}
 	return render(request,'dashboard/books.html',context)
 
 
@@ -190,9 +199,13 @@ def dictionary(request):
 		form = DashboardForm(request.POST)
 		text = request.POST['text']
 		#  Try catch required
-		url = "https://api.dictionaryapi.dev/api/v2/entries/en_US/"+text;
-		r = requests.get(url)
-		ans = r.json()
+		try:
+			url = "https://api.dictionaryapi.dev/api/v2/entries/en_US/"+text;
+			r = requests.get(url)
+			ans = r.json()
+		except:
+			messages.error(request,f"Error please try again")
+			return redirect('dictionary')
 		try:
 			phonetics = ans[0]['phonetics'][0]['text']
 			audio = ans[0]['phonetics'][0]['audio']
@@ -222,7 +235,11 @@ def wiki(request):
 		text = request.POST['text']
 		form = DashboardForm(request.POST)
 		# Try catch required
-		search = wikipedia.page(text)
+		try: 
+			search = wikipedia.page(text)
+		except: 
+			messages.error(request,f"Please try again")
+			return redirect('wiki')
 		context = {
 		"form":form,
 		'title'	: search.title,

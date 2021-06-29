@@ -7,7 +7,7 @@
     <p>just enter the search query to obtain the results</p><b></b>
     <form action="" method="post">
         {% csrf_token %}
-        {{search}}
+        {{form}}
         <input class="btn btn-danger" type="submit" value="Submit">
     </form><br>
     {% for book in result %}
